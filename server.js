@@ -14,30 +14,21 @@ let otpStorage = {};
 // Endpoint to send OTP
 app.post('/send-otp', (req, res) => {
   const { mobile } = req.body;
-  const otp = Math.floor(100000 + Math.random() * 900000);
 
+  if (!mobile) {
+    return res.json({ success: false, message: 'Mobile number is required' });
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
   otpStorage[mobile] = otp;
 
-  const message = `Your OTP for verification is ${otp}`;
-  
-  fetch('https://www.fast2sms.com/dev/bulkV2', {
-    method: 'POST',
-    headers: {
-      'authorization': FAST2SMS_API,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      route: 'q',
-      message,
-      language: 'english',
-      flash: 0,
-      numbers: mobile
-    })
-  })
+  const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${FAST2SMS_API}&route=otp&variables_values=${otp}&flash=1&numbers=${mobile}`;
+
+  fetch(url, { method: 'GET' })
     .then(response => response.json())
     .then(data => {
       if (data.return) {
-        res.json({ success: true });
+        res.json({ success: true, message: 'OTP sent successfully' });
       } else {
         res.json({ success: false, message: 'Failed to send OTP. Please try again.' });
       }
@@ -49,11 +40,15 @@ app.post('/send-otp', (req, res) => {
 app.post('/verify-otp', (req, res) => {
   const { mobile, otp } = req.body;
 
-  if (otpStorage[mobile] && otpStorage[mobile] == otp) {
+  if (!otpStorage[mobile]) {
+    return res.json({ success: false, message: 'OTP not found or expired' });
+  }
+
+  if (otpStorage[mobile] == otp) {
     delete otpStorage[mobile];
-    res.json({ success: true });
+    res.json({ success: true, message: 'Mobile number verified successfully' });
   } else {
-    res.json({ success: false });
+    res.json({ success: false, message: 'Invalid OTP' });
   }
 });
 
