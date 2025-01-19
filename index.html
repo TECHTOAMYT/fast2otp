@@ -62,7 +62,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Verify Mobile</h1>
+    <h1>Mobile Verification</h1>
     <form id="otpForm">
       <div class="form-group">
         <label for="mobile">Enter Mobile Number</label>
@@ -79,24 +79,26 @@
   </div>
 
   <script>
+    const backendURL = 'https://fast2otp.vercel.app'; // Replace with your actual Vercel backend URL
+
     document.getElementById('sendOtp').addEventListener('click', () => {
       const mobile = document.getElementById('mobile').value;
       if (mobile) {
-        fetch('/send-otp', {
+        fetch(`${backendURL}/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mobile })
+          body: JSON.stringify({ mobile }),
         })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            document.getElementById('message').textContent = 'OTP sent successfully!';
-            document.getElementById('verifyOtp').style.display = 'block';
-            document.getElementById('sendOtp').style.display = 'none';
-          } else {
-            document.getElementById('message').textContent = data.message;
-          }
-        });
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById('message').textContent = 'OTP sent successfully!';
+              document.getElementById('verifyOtp').style.display = 'block';
+              document.getElementById('sendOtp').style.display = 'none';
+            } else {
+              document.getElementById('message').textContent = data.message;
+            }
+          });
       } else {
         document.getElementById('message').textContent = 'Please enter a valid mobile number.';
       }
@@ -105,19 +107,19 @@
     document.getElementById('verifyOtp').addEventListener('click', () => {
       const mobile = document.getElementById('mobile').value;
       const otp = document.getElementById('otp').value;
-      fetch('/verify-otp', {
+      fetch(`${backendURL}/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, otp })
+        body: JSON.stringify({ mobile, otp }),
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          document.getElementById('message').textContent = 'Mobile number verified successfully!';
-        } else {
-          document.getElementById('message').textContent = 'Invalid OTP. Please try again.';
-        }
-      });
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('message').textContent = 'Mobile number verified successfully!';
+          } else {
+            document.getElementById('message').textContent = 'Invalid OTP. Please try again.';
+          }
+        });
     });
   </script>
 </body>
